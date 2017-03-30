@@ -1,10 +1,19 @@
 def __main__(argv)
-  opt = Getopts.getopts(
+  opts = Getopts.getopts(
     'r:d',
-    'version'
+    't:d',
+    '--version'
   )
 
-  repo = opt['r']
+  repo = opts['r'] || 'nasum/release-note'
+
+  type = if opts['t'] == 'issue'
+    'issues'
+  elsif opts['t'] == 'pull-request'
+    'pulls'
+  else
+    'issues'
+  end
 
   curl = Curl.new
 
@@ -12,11 +21,17 @@ def __main__(argv)
     'User-Agent' => 'release-note'
   }
 
-  response = curl.get("https://api.github.com/repos/#{repo}/pulls?access_token=#{ENV['GITHUB_ACCESS_TOKEN']}&state=close", headers)
+  response = curl.get("https://api.github.com/repos/#{repo}/#{type}?access_token=#{ENV['GITHUB_ACCESS_TOKEN']}&state=close", headers)
+
+  puts "##{repo}"
 
   JSON::parse(response.body).each do |pr|
-    puts "## #{pr['title']}"
-    puts pr['body']
-    puts pr['closed_at']
+    doc = <<-"EOS"
+## #{pr['title']}"
+#{pr['body']}
+#{pr['closed_at']}
+    EOS
+
+    puts doc
   end
 end
