@@ -1,8 +1,10 @@
 def __main__(argv)
   opts = Getopts.getopts(
-    'r:t:v',
+    'r:t:f:v',
     'repository',
     'type',
+    'issue',
+    'pull-request',
     'version'
   )
 
@@ -11,9 +13,9 @@ def __main__(argv)
   else
     repo = opts['r'] || 'nasum/release-note'
 
-    type = if opts['t'] == 'issue'
+    type = if opts.include?('issue')
       'issues'
-    elsif opts['t'] == 'pull-request'
+    elsif opts.include?('pull-request')
       'pulls'
     else
       'issues'
