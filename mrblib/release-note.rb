@@ -1,37 +1,39 @@
 def __main__(argv)
   opts = Getopts.getopts(
-    'r:d',
-    't:d',
-    '--version'
+    'r:t:v',
+    'repository',
+    'type',
+    'version'
   )
 
-  repo = opts['r'] || 'nasum/release-note'
-
-  type = if opts['t'] == 'issue'
-    'issues'
-  elsif opts['t'] == 'pull-request'
-    'pulls'
+  if opts.include?('v') || opts.include?('version')
+    puts "release-note:#{ReleaseNote::VERSION}"
   else
-    'issues'
-  end
+    repo = opts['r'] || 'nasum/release-note'
 
-  curl = Curl.new
+    type = if opts['t'] == 'issue'
+      'issues'
+    elsif opts['t'] == 'pull-request'
+      'pulls'
+    else
+      'issues'
+    end
 
-  headers = {
-    'User-Agent' => 'release-note'
-  }
+    curl = Curl.new
 
-  response = curl.get("https://api.github.com/repos/#{repo}/#{type}?access_token=#{ENV['GITHUB_ACCESS_TOKEN']}&state=close", headers)
+    headers = {
+      'User-Agent' => 'release-note'
+    }
 
-  puts "##{repo}"
+    url = "https://api.github.com/repos/#{repo}/#{type}?access_token=#{ENV['GITHUB_ACCESS_TOKEN']}&state=close"
+    response = curl.get(url, headers)
 
-  JSON::parse(response.body).each do |pr|
-    doc = <<-"EOS"
-## #{pr['title']}"
-#{pr['body']}
-#{pr['closed_at']}
-    EOS
+    JSON::parse(response.body).select{ |obj| obj['closed_at'] != nil }.each do |pr|
+      doc = <<-"EOS"
+#{pr['closed_at']}：#{pr['title']}
+      EOS
 
-    puts doc
+      puts doc
+    end
   end
 end
