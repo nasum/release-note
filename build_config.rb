@@ -5,6 +5,9 @@ def gem_config(conf)
   conf.gem :mgem => 'mruby-http'
   conf.gem :mgem => 'mruby-env'
   conf.gem :mgem => 'mruby-json'
+  conf.gem :mgem => 'mruby-time-strftime'
+  
+  conf.gem :core => "mruby-time"
 
   # be sure to include this gem (the cli app)
   conf.gem File.expand_path(File.dirname(__FILE__))

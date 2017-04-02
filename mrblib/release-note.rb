@@ -21,13 +21,15 @@ def __main__(argv)
       'issues'
     end
 
+    from = opts['f'] || (Time.new - 60 * 60 * 24 * 7).strftime("%Y-%m-%dT%H:%M:%SZ")
+    
     curl = Curl.new
 
     headers = {
       'User-Agent' => 'release-note'
     }
 
-    url = "https://api.github.com/repos/#{repo}/#{type}?access_token=#{ENV['GITHUB_ACCESS_TOKEN']}&state=close"
+    url = "https://api.github.com/repos/#{repo}/#{type}?access_token=#{ENV['GITHUB_ACCESS_TOKEN']}&state=close&since=#{from}"
     response = curl.get(url, headers)
 
     JSON::parse(response.body).select{ |obj| obj['closed_at'] != nil }.each do |pr|
