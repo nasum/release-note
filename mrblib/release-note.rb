@@ -39,7 +39,7 @@ def __main__(argv)
       break if body.size == 0
 
       body.select{ |obj| obj['closed_at'] != nil }.each do |pr|
-        docs << "#{pr['closed_at']}：#{pr['title']}"
+        docs << "#{pr['closed_at']}\t#{pr['title']}"
       end
       count += 1
     end
