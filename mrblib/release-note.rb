@@ -22,22 +22,28 @@ def __main__(argv)
     end
 
     from = opts['f'] || (Time.new - 60 * 60 * 24 * 7).strftime("%Y-%m-%dT%H:%M:%SZ")
-    
     curl = Curl.new
 
     headers = {
       'User-Agent' => 'release-note'
     }
 
-    url = "https://api.github.com/repos/#{repo}/#{type}?access_token=#{ENV['GITHUB_ACCESS_TOKEN']}&state=close&since=#{from}"
-    response = curl.get(url, headers)
+    flg = true
+    count = 1
+    doc = []
 
-    JSON::parse(response.body).select{ |obj| obj['closed_at'] != nil }.each do |pr|
-      doc = <<-"EOS"
-#{pr['closed_at']}：#{pr['title']}
-      EOS
+    loop do
+      url = "https://api.github.com/repos/#{repo}/#{type}?access_token=#{ENV['GITHUB_ACCESS_TOKEN']}&state=close&since=#{from}&page=#{count}"
+      body = JSON::parse(curl.get(url, headers).body)
 
-      puts doc
+      break if body.size == 0
+
+      body.select{ |obj| obj['closed_at'] != nil }.each do |pr|
+        doc << "#{pr['closed_at']}：#{pr['title']}"
+      end
+      count += 1
     end
+
+    puts doc.join('\\n')
   end
 end
