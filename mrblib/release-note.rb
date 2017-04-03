@@ -30,7 +30,7 @@ def __main__(argv)
 
     flg = true
     count = 1
-    doc = []
+    docs = []
 
     loop do
       url = "https://api.github.com/repos/#{repo}/#{type}?access_token=#{ENV['GITHUB_ACCESS_TOKEN']}&state=close&since=#{from}&page=#{count}"
@@ -39,11 +39,13 @@ def __main__(argv)
       break if body.size == 0
 
       body.select{ |obj| obj['closed_at'] != nil }.each do |pr|
-        doc << "#{pr['closed_at']}：#{pr['title']}"
+        docs << "#{pr['closed_at']}：#{pr['title']}"
       end
       count += 1
     end
 
-    puts doc.join('\\n')
+    docs.each do |st|
+      puts st
+    end
   end
 end
